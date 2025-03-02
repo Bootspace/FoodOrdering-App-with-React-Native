@@ -1,12 +1,10 @@
-// import { Order } from '../../src/types';
+import { Order } from '../../src/types';
 import products from './products';
 import dayjs from 'dayjs';
 
 const now = dayjs();
 
-// onst orders: Order[]
-
-const orders: any[] = [
+const orders: Order[] = [
   {
     id: 23123,
     created_at: now.subtract(1, 'hour').toISOString(),
