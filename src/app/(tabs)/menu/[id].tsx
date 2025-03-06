@@ -7,11 +7,12 @@ import Button from '@/components/Button';
 import { useCart } from '@/providers/CartProvider';
 import { PizzaSize } from '@/types';
 
-const router = useRouter();
+
 
 const sizes: PizzaSize[] = ['S', 'M', 'L', 'XL'];
 
 const ProductDetailScreen = () => {
+  const router = useRouter();
   const { id } = useLocalSearchParams();
   const { addItem } = useCart();
 
