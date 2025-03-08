@@ -1,10 +1,11 @@
-import { View, Text, StyleSheet, TextInput, Image } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Image, Pressable, Alert } from 'react-native'
 import React, { useState } from 'react'
 import Button from '@/components/Button';
 import { text } from 'stream/consumers';
 import Colors from '@/constants/Colors';
 import * as ImagePicker from 'expo-image-picker';
-import { Stack } from 'expo-router';
+import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 
 const defaultPizzaImage = 'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/food/default.png';
 
@@ -13,6 +14,9 @@ const createProductScreen = () => {
     const [price, setPrice] = useState('');
     const [errors, setErrors] = useState('');
     const [image, setImage] = useState<string | null>(null);
+
+    const id = useLocalSearchParams();
+    const isUpdating = !!id;
 
     const resetFields = () => {
         setName('');
@@ -39,6 +43,10 @@ const createProductScreen = () => {
         return true;
     };
 
+    const onSubmit = () => {
+        isUpdating ? onUpdate() : onCreate()
+    };
+
     const onCreate = () => {
         if(!validateInput()) {
             return;
@@ -46,6 +54,30 @@ const createProductScreen = () => {
         console.log('Creating Product: ', name);
         resetFields();
     }
+
+    const onUpdate = () => {
+        if(!validateInput()) {
+            return;
+        }
+
+        console.log('Is updating...')
+        resetFields();
+    };
+
+    const onDelete = () => {
+        console.warn('Delete!!!!');
+    }
+
+    const confirmDelete = () => {
+        Alert.alert('Confirm', 'Are you sure you want to delete this product', [
+            { text: 'Cancel'},
+            {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: onDelete,
+            }
+        ]);
+    };
 
     const pickImage = async () => {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -61,8 +93,27 @@ const createProductScreen = () => {
 
   return (
     <View style={styles.container}>
-        <Stack.Screen options={{ title: 'Create Product' }} />
-        
+        <Stack.Screen 
+            options={{ 
+              title: 'Menu', 
+            headerRight: () => (
+            <Link href="/(admin)/menu/create" asChild>
+            <Pressable>
+                  {({ pressed }) => (
+                    <FontAwesome
+                      name="pencil"
+                      size={25}
+                      color={Colors.light.tint}
+                      style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </Link>
+            ),
+          }} />
+
+        <Stack.Screen options={{ title: isUpdating ? 'Update Product' :'Create Product' }} />
+
       <Image 
         source={{uri: image || defaultPizzaImage}} 
         style={styles.image}
@@ -88,7 +139,9 @@ const createProductScreen = () => {
       />
 
       <Text style={{color:'red'}}>{errors}</Text>
-      <Button onPress={onCreate} text='Create'/>
+      <Button onPress={onSubmit} text={isUpdating? 'Update':'Create'}/>
+
+      {isUpdating && <Text onPress={confirmDelete} style={styles.textButton}>Delete</Text>}
     </View>
   )
 }
